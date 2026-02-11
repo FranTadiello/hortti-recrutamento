@@ -1,10 +1,12 @@
-import { Controller, Get, Post, Body, Param, Query, Put, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query, Put, Delete, UseGuards } from '@nestjs/common';
 import { ProductService } from './product.service';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @Controller('products')
 export class ProductController {
   constructor(private service: ProductService) { }
 
+  @UseGuards(JwtAuthGuard)
   @Post()
   create(@Body() body: any) {
     return this.service.create(body);
@@ -20,11 +22,13 @@ export class ProductController {
     return this.service.findOne(Number(id));
   }
 
+  @UseGuards(JwtAuthGuard)
   @Put(':id')
   update(@Param('id') id: string, @Body() body: any) {
     return this.service.update(Number(id), body);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.service.remove(Number(id));
