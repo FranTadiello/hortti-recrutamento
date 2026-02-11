@@ -1,21 +1,44 @@
-import useSWR from 'swr'
+import { useEffect, useState } from 'react';
+import { api } from '../src/services/api';
 
-const fetcher = (url: string) => fetch(url).then(r => r.json())
+type Product = {
+  id: number;
+  name: string;
+  category: string;
+  price: number;
+  imageUrl?: string;
+};
 
 export default function Home() {
-  const { data, error } = useSWR('http://localhost:3001/products', fetcher)
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  if (error) return <div>Falha ao carregar</div>
-  if (!data) return <div>Carregando...</div>
+  useEffect(() => {
+    api.get('/products')
+      .then(res => setProducts(res.data))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return <p>Carregando...</p>;
 
   return (
     <div style={{ padding: 24 }}>
-      <h1>Hortti Inventory :)</h1>
-      <ul>
-        {data.map((p: any) => (
-          <li key={p.id}>{p.name} — {p.category} — R$ {p.price}</li>
-        ))}
-      </ul>
+      <h1>Hortti Inventory</h1>
+
+      {products.map(product => (
+        <div key={product.id} style={{ marginBottom: 16 }}>
+          <h3>{product.name}</h3>
+          <p>{product.category}</p>
+          <p>R$ {product.price}</p>
+
+          {product.imageUrl && (
+            <img
+              src={`http://localhost:3001${product.imageUrl}`}
+              width={150}
+            />
+          )}
+        </div>
+      ))}
     </div>
-  )
+  );
 }
