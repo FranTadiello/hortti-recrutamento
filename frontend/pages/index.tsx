@@ -10,7 +10,7 @@ export default function Home() {
 
   return (
     <div style={{ padding: 24 }}>
-      <h1>Hortti Inventory</h1>
+      <h1>Hortti Inventory :)</h1>
       <ul>
         {data.map((p: any) => (
           <li key={p.id}>{p.name} — {p.category} — R$ {p.price}</li>
