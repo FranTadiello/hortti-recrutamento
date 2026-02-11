@@ -1,8 +1,11 @@
-import { Controller, Get, Post, Body, Param, Query, Put, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query, Put, Delete, UseGuards, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { CreateProductDto } from './create-product.dto';
 import { UpdateProductDto } from './update-product.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { extname } from 'path/win32';
+import { diskStorage } from 'multer';
 
 @Controller('products')
 export class ProductController {
@@ -10,7 +13,26 @@ export class ProductController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Body() dto: CreateProductDto) {
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: diskStorage({
+        destination: './uploads/products',
+        filename: (req, file, cb) => {
+          const uniqueName =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
+          cb(null, uniqueName + extname(file.originalname));
+        },
+      }),
+    }),
+  )
+  create(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() dto: CreateProductDto,
+  ) {
+    if (file) {
+      dto.imageUrl = `/uploads/products/${file.filename}`;
+    }
+
     return this.service.create(dto);
   }
 
@@ -26,7 +48,27 @@ export class ProductController {
 
   @UseGuards(JwtAuthGuard)
   @Put(':id')
-  update(@Param('id') id: string, @Body() dto: UpdateProductDto) {
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: diskStorage({
+        destination: './uploads/products',
+        filename: (req, file, cb) => {
+          const ext = extname(file.originalname);
+          const filename = `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
+          cb(null, filename);
+        },
+      }),
+    }),
+  )
+  update(
+    @Param('id') id: string,
+    @Body() dto: UpdateProductDto,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    if (file) {
+      dto.imageUrl = `/uploads/products/${file.filename}`;
+    }
+
     return this.service.update(Number(id), dto);
   }
 

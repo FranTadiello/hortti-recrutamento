@@ -3,6 +3,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { ProductModule } from './product/product.module';
 import { AuthModule } from './auth/auth.module';
+import { ServeStaticModule } from '@nestjs/serve-static/dist/serve-static.module';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -21,6 +23,10 @@ import { AuthModule } from './auth/auth.module';
     }),
     ProductModule,
     AuthModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'),
+      serveRoot: '/uploads',
+    }),
   ],
 })
 export class AppModule {}
