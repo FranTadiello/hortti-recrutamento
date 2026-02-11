@@ -3,7 +3,7 @@ import { ProductService } from './product.service';
 
 @Controller('products')
 export class ProductController {
-  constructor(private service: ProductService) {}
+  constructor(private service: ProductService) { }
 
   @Post()
   create(@Body() body: any) {
